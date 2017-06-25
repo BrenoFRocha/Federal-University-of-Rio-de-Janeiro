@@ -1,0 +1,214 @@
+#include <stdio.h>
+#include "global.h"
+#include "structures.h"
+
+int random_int(int min, int max)
+{
+   return min + rand() % (max+1 - min);
+}
+
+PADDLE CreatePaddle(float x, float y, float w, float h, float vP, bool r, bool l)
+{
+	PADDLE paddle;
+	paddle.position.x = 0;
+	paddle.position.y = 0;
+	paddle.position.w = 512;
+	paddle.position.h = 128;
+	paddle.transform.x = x;
+	paddle.transform.y = y;
+	paddle.transform.w = w;
+	paddle.transform.h = h;
+	paddle.pV = vP;
+	paddle.right = r;
+	paddle.left = l;
+	return paddle;
+}
+
+BALL CreateBall(float x, float y, float w, float h, float xV, float yV, float constant)
+{
+	BALL b;
+	b.position.x = 0;
+	b.position.y = 0;
+	b.position.w = 912;
+	b.position.h = 913;
+	b.transform.x = x;
+	b.transform.y = y;
+	b.transform.w = w;
+	b.transform.h = h;
+	b.vX = xV;
+	b.vY = yV;
+	b.c = constant;
+	return b;
+}
+
+BLOCK CreateBlock(float x, float y, float w, float h, int resistance, bool death)
+{
+	BLOCK k;
+	k.position.x = 0;
+	k.position.y = 0;
+	k.position.w = 400;
+	k.position.h = 200;
+	k.transform.x = x;
+	k.transform.y = y;
+	k.transform.w = w;
+	k.transform.h = h;
+	k.r = resistance;
+	k.dead = death;
+	return k;
+}
+
+void DrawText( int posX, int posY, SDL_Surface* sMessage, SDL_Surface* sScreen)
+{
+    SDL_Rect position;
+    position.x = posX;
+    position.y = posY;
+    SDL_BlitSurface(sMessage, NULL, sScreen, &position);
+}
+
+void UpdatePaddle(PADDLE *p)
+{
+	if(p->right && p->left)
+    {
+        p->transform.x = p->transform.x;
+    }
+    else if(p->right && p->transform.x + p->transform.w < gameScreenW)
+    {
+        p->transform.x += p->pV;
+    }
+    else if(p->left && p->transform.x > 0)
+    {
+        p->transform.x -= p->pV;
+    }
+}
+
+void UpdateBall(BALL *b, PADDLE *p)
+{
+	b->transform.x += b->vX;
+	b->transform.y += b->vY;
+	if(b->transform.x <= 0 && b->vX < 0)
+	{
+		b->vX *= -1;
+		b->transform.x += b->vX;
+	}
+	else if(b->transform.x >= gameScreenW - 30 && b->vX > 0)
+	{
+		b->vX *= -1;
+		b->transform.x += b->vX;
+	}
+	if(b->transform.y <= 0 && b->vY < 0)
+	{
+		b->vY *= -1;
+		b->transform.y += b->vY;
+	}
+	else if(b->transform.y >= gameScreenH && b->vY > 0)
+	{
+		scenes = 1;
+		/*b->vY *= -1;
+		b->transform.y += b->vY;*/
+	}
+	if(b->transform.x + b->transform.w >= p->transform.x && b->transform.x < p->transform.x + p->transform.w/2 &&
+		b->transform.y + b->transform.h >= p->transform.y && b->transform.y <= p->transform.y + p->transform.h &&
+		b->vY > 0)
+	{
+		if(b->vX < 0)
+		{
+			b->vX *= b->c;
+		}
+		else
+		{
+			b->vX /= b->c;
+		}
+		b->vY *= -1;
+		b->transform.y += b->vY;
+	}
+	else if(b->transform.x + b->transform.w >= p->transform.x + p->transform.w/2 && b->transform.x <= p->transform.x + p->transform.w &&
+		b->transform.y + b->transform.h >= p->transform.y && b->transform.y <= p->transform.y + p->transform.h &&
+		b->vY > 0)
+	{
+		if(b->vX > 0)
+		{
+			b->vX *= b->c;
+		}
+		else
+		{
+			b->vX /= b->c;
+		}
+		b->vY *= -1;
+		b->transform.y += b->vY;
+	}
+}
+
+void UpdateBlock(BLOCK *br, BALL *ba)
+{
+	if(!br->dead)
+	{
+		if(ba->transform.x + ba->transform.w >= br->transform.x && ba->transform.x < br->transform.x + br->transform.w &&
+		ba->transform.y + ba->transform.h >= br->transform.y && ba->transform.y <= br->transform.y + br->transform.h)
+		{
+			br->r -= 1;
+			ba->vY *= -1;
+			ba->transform.y += ba->vY;
+			ba->transform.x += ba->vX;
+		}
+		if(br->r < 1)
+		{
+			intPoints += 100;
+			updateP = true;
+			br->transform.x = -2000;
+			br->dead = true;
+		}
+	}
+}
+
+void GameEvents(SDL_Event e)
+{
+	switch (e.type) 
+	{
+		case SDL_KEYDOWN:
+	        if(scenes == 0)
+	        {
+	            if(e.key.keysym.sym == SDLK_RIGHT) 
+	            {
+	                player.right = true;
+	            }
+	            if(e.key.keysym.sym == SDLK_LEFT) 
+	            {
+	                player.left = true;
+	            }
+	        }
+	        break;
+	    case SDL_KEYUP:
+	        if(scenes == 0)
+	        {
+	            if(e.key.keysym.sym == SDLK_RIGHT) 
+	            {
+	                player.right = false;
+	            }
+	            if(e.key.keysym.sym == SDLK_LEFT) 
+	            {
+	                player.left = false;
+	            }
+	        }
+	        break;
+	}
+}
+
+SDL_Surface* LoadSurface(char *imagePath) 
+{
+    SDL_Surface* optimized = NULL;
+    SDL_Surface* loaded = IMG_Load(imagePath);
+    if(loaded == NULL)
+    {
+        printf("Erro ao carregar a imagem %s! SDL_image Error: %s\n", imagePath, IMG_GetError());
+    }
+    else 
+    {
+        optimized = SDL_ConvertSurface(loaded, gameScreen->format, 0);
+        if(optimized == NULL)
+        {
+            printf("Erro ao otimizar a imagem %s! SDL Error: %s\n", imagePath, SDL_GetError());
+        }
+        SDL_FreeSurface(loaded);
+    }
+    return optimized;
+}
