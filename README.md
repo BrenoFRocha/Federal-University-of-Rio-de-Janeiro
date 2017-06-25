@@ -8,8 +8,13 @@ In this repository, I will add all the projects made in the subjects of the cour
 
  - Game Project | Semester: 2017.1
 
+### Whole Numbers and Cryptography
+
+ - Final Project | Semester: 2017.1
+
 ### Important
 
-Authors and Contributors: Breno Rocha
+Author: Breno Rocha
+Contributors: Breno Rocha and Arthur Guilherme (Game Project)
 
 Suggestions or Contact: Having problems with this repository? Having suggestions for me about a project? Contact me at brenoferreirarocha@gmail.com and I will be happy to help and listen you.
