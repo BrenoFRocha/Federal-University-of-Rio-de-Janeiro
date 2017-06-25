@@ -15,6 +15,6 @@ In this repository, I will add all the projects made in the subjects of the cour
 ### Important
 
 - Author: Breno Rocha
-- Contributors: Breno Rocha and Arthur Guilherme (Game Project)
+- Contributors: Breno Rocha and [Arthur Guilherme](https://github.com/6uilherme) (Game Project)
 
 Suggestions or Contact: Having problems with this repository? Having suggestions for me about a project? Contact me at brenoferreirarocha@gmail.com and I will be happy to help and listen you.
