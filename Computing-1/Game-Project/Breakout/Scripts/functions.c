@@ -7,7 +7,7 @@ int random_int(int min, int max)
    return min + rand() % (max+1 - min);
 }
 
-PADDLE CreatePaddle(float x, float y, float w, float h, float vP, bool r, bool l)
+PADDLE CreatePaddle(float x, float y, float w, float h, float vP, bool r, bool l, int vida)
 {
 	PADDLE paddle;
 	paddle.position.x = 0;
@@ -21,6 +21,7 @@ PADDLE CreatePaddle(float x, float y, float w, float h, float vP, bool r, bool l
 	paddle.pV = vP;
 	paddle.right = r;
 	paddle.left = l;
+	paddle.life = vida;
 	return paddle;
 }
 
@@ -83,58 +84,79 @@ void UpdatePaddle(PADDLE *p)
 
 void UpdateBall(BALL *b, PADDLE *p)
 {
-	b->transform.x += b->vX;
-	b->transform.y += b->vY;
-	if(b->transform.x <= 0 && b->vX < 0)
+	if(start)
 	{
-		b->vX *= -1;
 		b->transform.x += b->vX;
-	}
-	else if(b->transform.x >= gameScreenW - 30 && b->vX > 0)
-	{
-		b->vX *= -1;
-		b->transform.x += b->vX;
-	}
-	if(b->transform.y <= 0 && b->vY < 0)
-	{
-		b->vY *= -1;
 		b->transform.y += b->vY;
+		if(b->transform.x <= 0 && b->vX < 0)
+		{
+			b->vX *= -1;
+			b->transform.x += b->vX;
+		}
+		else if(b->transform.x >= gameScreenW - 30 && b->vX > 0)
+		{
+			b->vX *= -1;
+			b->transform.x += b->vX;
+		}
+		if(b->transform.y <= 0 && b->vY < 0)
+		{
+			b->vY *= -1;
+			b->transform.y += b->vY;
+		}
+		else if(b->transform.y >= gameScreenH && b->vY > 0)
+		{
+			p->life -= 1;
+			pLife = p->life;
+			updateL = true;
+			if(p->life > 0)
+			{
+				start = false;
+				p->transform.x = gameScreenW/2 - 50;
+			}
+			else
+			{
+				scenes = 6;
+			}
+			/*b->vY *= -1;
+			b->transform.y += b->vY;*/
+		}
+		if(b->transform.x + b->transform.w >= p->transform.x && b->transform.x < p->transform.x + p->transform.w/2 &&
+			b->transform.y + b->transform.h >= p->transform.y && b->transform.y <= p->transform.y + p->transform.h &&
+			b->vY > 0)
+		{
+			if(b->vX < 0)
+			{
+				b->vX *= b->c;
+			}
+			else
+			{
+				b->vX /= b->c;
+			}
+			b->vY *= -1;
+			b->transform.y += b->vY;
+		}
+		else if(b->transform.x + b->transform.w >= p->transform.x + p->transform.w/2 && b->transform.x <= p->transform.x + p->transform.w &&
+			b->transform.y + b->transform.h >= p->transform.y && b->transform.y <= p->transform.y + p->transform.h &&
+			b->vY > 0)
+		{
+			if(b->vX > 0)
+			{
+				b->vX *= b->c;
+			}
+			else
+			{
+				b->vX /= b->c;
+			}
+			b->vY *= -1;
+			b->transform.y += b->vY;
+		}
 	}
-	else if(b->transform.y >= gameScreenH && b->vY > 0)
+	else
 	{
-		scenes = 1;
-		/*b->vY *= -1;
-		b->transform.y += b->vY;*/
-	}
-	if(b->transform.x + b->transform.w >= p->transform.x && b->transform.x < p->transform.x + p->transform.w/2 &&
-		b->transform.y + b->transform.h >= p->transform.y && b->transform.y <= p->transform.y + p->transform.h &&
-		b->vY > 0)
-	{
-		if(b->vX < 0)
-		{
-			b->vX *= b->c;
-		}
-		else
-		{
-			b->vX /= b->c;
-		}
-		b->vY *= -1;
-		b->transform.y += b->vY;
-	}
-	else if(b->transform.x + b->transform.w >= p->transform.x + p->transform.w/2 && b->transform.x <= p->transform.x + p->transform.w &&
-		b->transform.y + b->transform.h >= p->transform.y && b->transform.y <= p->transform.y + p->transform.h &&
-		b->vY > 0)
-	{
-		if(b->vX > 0)
-		{
-			b->vX *= b->c;
-		}
-		else
-		{
-			b->vX /= b->c;
-		}
-		b->vY *= -1;
-		b->transform.y += b->vY;
+		b->transform.w = 30;
+		b->transform.h = 30;
+		b->transform.y = p->transform.y - p->transform.h;
+		b->transform.x = p->transform.x + p->transform.w/2 - b->transform.w/2;
 	}
 }
 
@@ -153,9 +175,18 @@ void UpdateBlock(BLOCK *br, BALL *ba)
 		if(br->r < 1)
 		{
 			intPoints += 100;
+			toNLife += 100;
 			updateP = true;
+			if(toNLife >= 10000)
+			{
+				toNLife = 0;
+				player.life += 1;
+				pLife = player.life;
+				updateL = true;
+			}
 			br->transform.x = -2000;
 			br->dead = true;
+			howManyD += 1;
 		}
 	}
 }
@@ -165,29 +196,135 @@ void GameEvents(SDL_Event e)
 	switch (e.type) 
 	{
 		case SDL_KEYDOWN:
-	        if(scenes == 0)
+	        switch(scenes)
 	        {
-	            if(e.key.keysym.sym == SDLK_RIGHT) 
-	            {
-	                player.right = true;
-	            }
-	            if(e.key.keysym.sym == SDLK_LEFT) 
-	            {
-	                player.left = true;
-	            }
+	        	case 0:
+		        	if(e.key.keysym.sym == SDLK_RIGHT) 
+		            {
+		                player.right = true;
+		            }
+		            if(e.key.keysym.sym == SDLK_LEFT) 
+		            {
+		                player.left = true;
+		            }
+		            if(e.key.keysym.sym == SDLK_SPACE)
+		        	{
+		        		if(!start)
+		        		{
+		        			start = true;
+		        		}
+		        	}
+		        break;
+		        case 1:
+		        	if(e.key.keysym.sym == SDLK_UP)
+		        	{
+		        		if(mOption > 0)
+		        		{
+		        			mOption -= 1;
+		        		}
+		        	}
+		        	else if(e.key.keysym.sym == SDLK_DOWN)
+		        	{
+		        		if(mOption < 4)
+		        		{
+		        			mOption += 1;
+		        		}
+		        	}
+		        	else if(e.key.keysym.sym == SDLK_RETURN)
+		        	{
+		        		switch(mOption)
+		        		{
+		        			case 0:
+		        				scenes = 0;
+		        				ball.transform.y = player.transform.y;
+		        				start = false;
+		        				creation = true;
+		        				updateL = true;
+		        			break;
+		        			case 1:
+		        				scenes = 2;
+		        			break;
+		        			case 2:
+		        				scenes = 3;
+		        			break;
+		        			case 3:
+		        				scenes = 4;
+		        			break;
+		        			case 4:
+		        				running = false;
+		        			break;
+		        		}
+		        	}
+		        break;
+		        case 3:
+		        	if(e.key.keysym.sym == SDLK_UP)
+		        	{
+		        		if(prefOption > 0)
+		        		{
+		        			prefOption -= 1;
+		        		}
+		        	}
+		        	else if(e.key.keysym.sym == SDLK_DOWN)
+		        	{
+		        		if(prefOption < 1)
+		        		{
+		        			prefOption += 1;
+		        		}
+		        	}
+		        	else if(e.key.keysym.sym == SDLK_RETURN)
+		        	{
+		        		switch(prefOption)
+		        		{
+		        			case 0:
+		        				soundOn = !soundOn;
+		        				if(soundOn)
+		        				{
+		        					Mix_PlayMusic(gameSound1, -1);
+		        				}
+		        				else
+		        				{
+		        					Mix_PauseMusic();
+		        				}
+		        			break;
+		        			case 1:
+		        				scenes = 1;
+		        			break;
+		        		}
+		        	}
+		        break;
+		        case 4:
+		        	if(e.key.keysym.sym == SDLK_RETURN)
+		        	{
+		        		scenes = 1;
+		        	}
+		        break;
+		        case 5:
+		        	if(e.key.keysym.sym == SDLK_RETURN)
+		        	{
+		        		scenes = 1;
+		        	}
+		        break;
+		        case 6:
+		        	if(e.key.keysym.sym == SDLK_RETURN)
+		        	{
+		        		scenes = 1;
+		        	}
+		        break;
 	        }
 	        break;
 	    case SDL_KEYUP:
-	        if(scenes == 0)
+	        switch(scenes)
 	        {
-	            if(e.key.keysym.sym == SDLK_RIGHT) 
-	            {
-	                player.right = false;
-	            }
-	            if(e.key.keysym.sym == SDLK_LEFT) 
-	            {
-	                player.left = false;
-	            }
+	        	case 0:
+		            if(e.key.keysym.sym == SDLK_RIGHT) 
+		            {
+		                player.right = false;
+		            }
+		            if(e.key.keysym.sym == SDLK_LEFT) 
+		            {
+		                player.left = false;
+		            }
+		        break;
 	        }
 	        break;
 	}

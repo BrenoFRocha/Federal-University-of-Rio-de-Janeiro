@@ -14,6 +14,7 @@ typedef struct _PADDLE
 	float pV;
 	bool right;
 	bool left;
+	int life;
 } PADDLE;
 
 typedef struct _BALL

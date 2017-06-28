@@ -5,7 +5,7 @@
 //Initializing functions//
 
 int random_int(int min, int max);
-PADDLE CreatePaddle(float x, float y, float w, float h, float vP, bool r, bool l);
+PADDLE CreatePaddle(float x, float y, float w, float h, float vP, bool r, bool l, int vida);
 BALL CreateBall(float x, float y, float w, float h, float xV, float yV, float constant);
 BLOCK CreateBlock(float x, float y, float w, float h, int resistance, bool death);
 void UpdatePaddle(PADDLE *p);
