@@ -32,6 +32,7 @@ extern bool start;
 extern bool updateP;
 extern bool updateL;
 extern bool soundOn;
+extern bool showRec;
 extern Mix_Music *gameSound1;
 extern SDL_Surface* gameScreen;
 extern SDL_Surface* paddleImage;

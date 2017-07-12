@@ -33,6 +33,7 @@ bool start = false;
 bool updateP = true;
 bool updateL = true;
 bool soundOn = true;
+bool showRec = false;
 Mix_Music *gameSound1;
 SDL_Surface* gameScreen = NULL;
 SDL_Surface* paddleImage = NULL;

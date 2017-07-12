@@ -226,6 +226,7 @@ void GameScene()
                 }
             }
         }
+        player.transform.x = gameScreenW/2 - 50;
     	updateGS = true;
     	howManyD = 0;
     }
@@ -293,7 +294,13 @@ void MenuScene()
     DrawText(230, 400, menuConf, gameScreen );
     DrawText(285, 450, menuCred, gameScreen );
     DrawText(350, 500, menuQuit, gameScreen );
+    if(showRec)
+    {
+		credBack = TTF_RenderText_Solid(pFont, "Anote os recordes no seu bloco de notas!", pTextC);
+		DrawText(10, 550, credBack, gameScreen );
+	}
 }
+
 
 void CredScene()
 {
@@ -485,8 +492,8 @@ void Creator()
         case 0:
         	intPoints = 0;
         	updateP = true;
-            player = CreatePaddle(gameScreenW/2 - 50, (gameScreenH - gameScreenH/10) - 15,100,30, 1.5, false, false, 3);
-            ball = CreateBall(gameScreenW/2 - 15, gameScreenH/2 - 15, 30, 30, 2, 2, 1.0001);
+            player = CreatePaddle(gameScreenW/2 - 50, (gameScreenH - gameScreenH/10) - 15,100,30, 3, false, false, 3);
+            ball = CreateBall(gameScreenW/2 - 7.5, gameScreenH/2 - 7.5, 15, 15, 2, 2, 1.0001);
             howManyD = 0;
             stage = 1;
             howManyD = 0;
@@ -508,9 +515,6 @@ void Creator()
             updateL = true;
             howManyD = 0;
 
-        break;
-        case 1:
-			
         break;
     }
 }

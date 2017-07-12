@@ -1,9 +1,18 @@
+#Universidade Federal do Rio de Janeiro.
+#Numeros Inteiros e Criptografia.
+#Trabalho Final.
+#Codificado por: Breno Rocha - DRE: 117079354.
+
 #Bibliotecas utilizadas
+
 import random
 import os.path
 from hashlib import sha224
-#Demais algoritmos
-#0
+
+#-----------------------------------------------------------------------------------------------------------------------------
+#0 - Demais algoritmos
+
+#Funcao que retorna o resultado do MDC entre dois numeros.
 def MDC(n1,n2):
 	number1 = n1
 	number2 = n2
@@ -15,6 +24,8 @@ def MDC(n1,n2):
 		number1 = number2
 		number2 = r	
 	return number1
+
+#Funcao que retorna o resultado de um numero 'b' elevado a 'e' n modulo 'm'.
 def ExpModular(b,e,m):
 	result = 1
 	base = b
@@ -31,31 +42,40 @@ def ExpModular(b,e,m):
 			base *= base
 			base = base%module
 	return result
-def MillerRabin(number,base):
-	n = number
-	b = base
-	if(n % 2 == 0 and n != 2):
-		return "Composto"
-	elif(n == 1 or n == 2 or n == 3):
-		return "Primo"
-	else:
-		k = 0
-		q = n - 1
-		while(q % 2 == 0):
-			k += 1
-			q /= 2
-		t = ExpModular(b,q,n)
-		if(t == 1 or t == n-1):
-			return "Primo"
-		else:
-			i = 1
-			while (i < k):
-				t = ExpModular(t,2,n)
-				if(t == n-1):
-					return "Primo"
-				else:
-					i += 1
-			return "Composto"
+
+#Funcao que repete o teste de Miller-Rabin de um numero 'n' em 'k' bases diferentes e returna False caso seja composto e True caso o numero provavelmente seja primo.
+def MultiBaseMR(n,k = 10):
+	assert(n >= 2)
+	if(k > n):
+		b = k - n
+	usedB = []
+	for i in range(0,10):
+		b = random.randint(2,n-1)
+		while(b in usedB):
+			b = random.randint(2,n-1)
+		usedB.append(b)
+		if(MillerRabin(n, b)):
+			return False
+	return True
+
+#Funcao que realiza o teste de Miller-Rabin de um numero 'n' para a base 'b' e returna True caso seja composto e False caso o numero provavelmente seja primo.
+def MillerRabin(n,b = 2):
+	assert(n >= 2)
+	k = 0
+	q = n - 1
+	while(q % 2 == 0):
+		k = k + 1
+		q = q/2
+	t = ExpModular(b,q,n)
+	if(t == 1 or t == (-1 % n)):
+		return False
+	for i in range(0, k):
+		t = ExpModular(t,2,n)
+		if(t == n-1):
+			return False
+	return True
+
+#Funcao que realiza o algoritmo euclidiano estendido entre 2 numeros e retorna o valor de x.
 def EuclidianoEstendido(n1,n2):
 	number1 = n1
 	number2 = n2
@@ -82,6 +102,8 @@ def EuclidianoEstendido(n1,n2):
 		if(number2 != 0):
 			savedX = x2
 	return savedX;
+
+#Funcao manual que converte numeros na base decimal para a base hexadecimal retornando uma string.
 def ConvertToHex(decimal):
     n = (decimal % 16)
     temp = ""
@@ -103,10 +125,14 @@ def ConvertToHex(decimal):
         return ConvertToHex(decimal / 16) + str(temp)
     else:
         return str(temp)
+
+#Funcao manual que converte numeros na base hexadecimal para a base decimal retornando uma string.
 def ConvertToDec(hexadecimal):
 	n = hexadecimal
 	result = int(n,16)
 	return str(result)
+
+#Funcao manual que retorna um numero 'n' modulo de um numero 'm'.
 def Module(n,m):
 	result = 0
 	num = n
@@ -120,9 +146,11 @@ def Module(n,m):
 	else:
 		result = num%mod
 	return result
+
 #-----------------------------------------------------------------------------------------------------------------------------
-#1
-#Metodos para o modo de geracao de chaves
+#1 - Metodos para o modo de geracao de chaves
+
+#Funcao para oferecer ao usuario opcoes de exibicao e salvamento de chaves a partir do fornecimento dos componentes da chave 'n', 'e' e 'd' do tipo RSA.
 def SaveKeysRSA(n,e,d):
 	chose = ''
 	while(chose != "Salvar" and chose != "Exibir"):
@@ -158,6 +186,8 @@ def SaveKeysRSA(n,e,d):
 		else:
 			print("Entrada invalida, tente novamente.")
 			print("")
+
+#Funcao para oferecer ao usuario opcoes de exibicao e salvamento de chaves a partir do fornecimento dos componentes da chave 'p', 'g', 'c' e 'a' do tipo El Gamal.
 def SaveKeysElGamal(p,g,c,a):
 	chose = ''
 	while(chose != "Salvar" and chose != "Exibir"):
@@ -197,13 +227,15 @@ def SaveKeysElGamal(p,g,c,a):
 		else:
 			print("Entrada invalida, tente novamente.")
 			print("")
+
+#Funcao para a geracao de chaves do tipo RSA.
 def GRSA():
-	p = 10
-	q = 10
+	p = random.getrandbits(128)
+	q = random.getrandbits(128)
 	print("Gerando chaves e componentes...")
-	while(MillerRabin(p,2) != "Primo"):
+	while(not MultiBaseMR(p) or p.bit_length() != 128):
 		p = random.getrandbits(128)
-	while(MillerRabin(q,2) != "Primo"):
+	while(not MultiBaseMR(q) or q.bit_length() != 128):
 		q = random.getrandbits(128)
 	n = p*q
 	phiN = (p-1)*(q-1)
@@ -227,6 +259,8 @@ def GRSA():
 	print("Chaves e componentes gerados com sucesso!")
 	print("")
 	SaveKeysRSA(n,e,d)
+
+#Funcao para a geracao de chaves do tipo El Gamal.
 def GElGamal():
 	q = 10
 	p = 10
@@ -234,7 +268,7 @@ def GElGamal():
 	a = 0
 	c = 0
 	print("Gerando chaves e componentes...")
-	while(MillerRabin(q,2) != "Primo" or MillerRabin(p,2) != "Primo" or q.bit_length() != 255 or p.bit_length() != 256):
+	while(not MultiBaseMR(q) or not MultiBaseMR(p) or q.bit_length() != 255 or p.bit_length() != 256):
 		q = random.getrandbits(255)
 		p = q*2+1
 	while(ExpModular(g, q, p) == 1):
@@ -256,6 +290,8 @@ def GElGamal():
 	print("Chaves e componentes gerados com sucesso!")
 	print("")
 	SaveKeysElGamal(p,g,c,a)
+
+#Funcao para oferecer opcoes ao usuario para que o mesmo escolha entre gerar chaves de RSA ou de El Gamal.
 def GCriptografia():
 	chose = ''
 	while(chose != "RSA" and chose != "El Gamal"):
@@ -272,7 +308,8 @@ def GCriptografia():
 		else:
 			print("Entrada invalida, tente novamente.")
 			print("")	
-#Programa principal de geracao de chaves
+
+#Programa principal de geracao de chaves que e apresentado ao usuario para que o mesmo escolha entre gerar chaves de criptografia ou chaves de assinatura digital.
 def Gprogram():
 	chose = ''
 	while(chose != "Assinatura Digital" and chose != "Criptografia"):
@@ -289,9 +326,11 @@ def Gprogram():
 		else:
 			print("Entrada invalida, tente novamente.")
 			print("")
+
 #-----------------------------------------------------------------------------------------------------------------------------
-#2
-#Metodos para o modo de encriptacao (pura)
+#2 - Metodos para o modo de encriptacao (pura)
+
+#Funcao de encriptacao de um arquivo de nome 'fName' e salvamento de um novo arquivo utilizando RSA.
 def ERSA(fName):
 	chose = ''
 	n = 0
@@ -335,14 +374,30 @@ def ERSA(fName):
 	nameF = raw_input()
 	newF = open(nameF, 'w')
 	block = ''
+	blockM = ''
+	i = 0 
+	cN = int(ConvertToDec(n))
+	cE = int(ConvertToDec(e))
+	lC = len(content)
 	print("")
 	print("Encriptando...")
-	while(c < len(content)):
+	while(c < lC): 
 		block = (ord(content[c])+100)
-		block = ExpModular(block, int(ConvertToDec(e)), int(ConvertToDec(n)))
-		newF.write(str(block)+"\n")
+		blockM = blockM + str(block)
+		i += 1 
+		if(i > 24):
+			i = 0
+			blockM = ExpModular(int(blockM), cE, cN)
+			newF.write(str(blockM)+"\n")
+			blockM = ''
+		elif(c == lC-1 and blockM != ''):
+			blockM = ExpModular(int(blockM), cE, cN)
+			newF.write(str(blockM)+"\n")
+			blockM = '' 
 		c += 1
 	print("Arquivo encriptado com sucesso!")
+
+#Funcao de encriptacao de um arquivo de nome 'fName' e salvamento de um novo arquivo utilizando El Gamal.
 def EElGamal(fName):
 	chose = ''
 	p = 0
@@ -390,21 +445,37 @@ def EElGamal(fName):
 	nameF = raw_input()
 	newF = open(nameF, 'w')
 	block = ''
+	blockM = ''
+	i = 0
 	print("")
 	print("Encriptando...")
 	p = int(ConvertToDec(p))
 	g = int(ConvertToDec(g))
 	c = int(ConvertToDec(c))
-	while(l < len(content)):
+	lC = len(content)
+	while(l < lC):
 		block = (ord(content[l])+100)
-		k = random.randint(2,p-2)
-		s = ExpModular(g, k, p)
-		t = (block*ExpModular(c, k, p))%p
-		newF.write(str(s)+"\n")
-		newF.write(str(t)+"\n")
+		blockM = blockM + str(block)
+		i += 1 
+		if(i > 24):
+			i = 0
+			k = random.randint(2,p-2)
+			s = ExpModular(g, k, p)
+			t = (int(blockM)*ExpModular(c, k, p))%p
+			newF.write(str(s)+"\n")
+			newF.write(str(t)+"\n")
+			blockM = ''
+		elif(l == lC-1 and blockM != ''):
+			k = random.randint(2,p-2)
+			s = ExpModular(g, k, p)
+			t = (int(blockM)*ExpModular(c, k, p))%p
+			newF.write(str(s)+"\n")
+			newF.write(str(t)+"\n")
+			blockM = '' 
 		l += 1
 	print("Arquivo encriptado com sucesso!")
-#Programa principal de encriptacao
+
+#Programa principal de encriptacao que e apresentado ao usuario para que o mesmo forneca o arquivo que se deseja encriptar utilizando RSA ou El Gamal.
 def Eprogram():
 	chose = ''
 	chosef = ''
@@ -435,9 +506,11 @@ def Eprogram():
 		else:
 			print("Arquivo nao existe, tente novamente.")
 			print("")
+
 #-----------------------------------------------------------------------------------------------------------------------------
-#3
-#Metodos para o modo de decriptacao (pura)
+#3 - Metodos para o modo de decriptacao (pura)
+
+#Funcao de decriptacao de um arquivo de nome 'fName' e salvamento de um novo arquivo utilizando o metodo do RSA.
 def DRSA(fName):
 	chose = ''
 	n = 0
@@ -479,15 +552,28 @@ def DRSA(fName):
 	nameF = raw_input()
 	newF = open(nameF, 'w')
 	line = primaryF.readline()
+	cD = int(ConvertToDec(d))
+	cN = int(ConvertToDec(n))
+	nMessage = ''
 	print("")
 	print("Decriptografando...")
 	while(line != ''):
 		block = line
-		block = ExpModular(int(block), int(ConvertToDec(d)), int(ConvertToDec(n)))
-		block = chr((int(block)-100))
-		newF.write(block)
+		block = ExpModular(int(block), cD, cN)
+		block = str(block)
+		i = 0
+		bL = len(block)
+		while(i < bL):
+			nMessage = block[i]
+			nMessage = nMessage + block[i+1]
+			nMessage = nMessage + block[i+2]
+			nMessage = chr((int(nMessage)-100))
+			newF.write(nMessage)
+			i += 3
 		line = primaryF.readline()
 	print("Arquivo decriptografado com sucesso!")
+
+#Funcao de decriptacao de um arquivo de nome 'fName' e salvamento de um novo arquivo utilizando o metodo do El Gamal.
 def DElGamal(fName):
 	chose = ''
 	p = 0
@@ -537,16 +623,27 @@ def DElGamal(fName):
 	newF = open(nameF, 'w')
 	blockS = primaryF.readline()
 	blockT = primaryF.readline()
+	nMessage = ''
 	print("")
 	print("Decriptografando...")
 	while(blockS != ''):
 		tempS = ExpModular(int(blockS), (p-1-a), p)
 		block = ((tempS*int(blockT))%p)
-		block = chr((int(block)-100))
-		newF.write(block)
+		i = 0
+		block = str(block)
+		bL = len(block)
+		while(i < bL):
+			nMessage = block[i]
+			nMessage = nMessage + block[i+1]
+			nMessage = nMessage + block[i+2]
+			nMessage = chr((int(nMessage)-100))
+			newF.write(nMessage)
+			i += 3
 		blockS = primaryF.readline()
 		blockT = primaryF.readline()
 	print("Arquivo decriptografado com sucesso!")
+
+#Programa principal de decriptacao que e apresentado ao usuario para que o mesmo forneca o nome do arquivo que se deseja decriptar utilizando RSA ou El Gamal.
 def Dprogram():
 	chose = ''
 	chosef = ''
@@ -579,17 +676,19 @@ def Dprogram():
 			print("")
 
 #-----------------------------------------------------------------------------------------------------------------------------
-#4
-#Metodos para o modo de assinatura digital (pura)
+#4- Metodos para o modo de assinatura digital (pura)
+
+#Funcao utilizada para assinar digitalmente um arquivo de nome 'primaryF' fornecido pelo usuario a partir de um primo 'prime' de um gerador 'generator' e uma chave privada 'privateK' tambem fornecidos pelo usuario.
 def ADigital(primaryF, prime, generator, privateK):
 	fileAD = open(primaryF, 'r')
 	content = fileAD.read()
 	charRead = 0
 	allFText = ''
+	ConvertToBin = lambda x: format(x, 'b')
+	lC = len(content)
 	print("Lendo arquivo...")
-	while(charRead < len(content)):
+	while(charRead < lC):
 		block = (ord(content[charRead]))
-		ConvertToBin = lambda x: format(x, 'b')
 		block = ConvertToBin(block)
 		allFText = str(allFText) + str(block)
 		charRead += 1
@@ -603,7 +702,6 @@ def ADigital(primaryF, prime, generator, privateK):
 		k = random.randint(2,p-2)
 	r = ExpModular(g, k, p)
 	kL = EuclidianoEstendido(k, p-1)
-	ConvertToBin = lambda x: format(x, 'b')
 	h = sha224(allFText).hexdigest()
 	h = int(ConvertToDec(h))
 	h = int(ConvertToBin(h))
@@ -622,6 +720,8 @@ def ADigital(primaryF, prime, generator, privateK):
 	fileF.write(r +"\n")
 	fileF.write(s +"\n")
 	print("Arquivo assinado com sucesso!")
+
+#Programa principal de assinatura digital que e apresentado ao usuario para que o mesmo forneca o nome do arquivo que se deseja assinar.
 def ADprogram():
 	p = 10
 	g = 10
@@ -675,9 +775,11 @@ def ADprogram():
 			print("Entrada invalida, tente novamente.")
 			print("")
 	ADigital(chosef1, p, g, a)
+
 #-----------------------------------------------------------------------------------------------------------------------------
-#5
-#Metodos para o modo de verificacao assinatura digital (pura)
+#5 - Metodos para o modo de verificacao assinatura digital (pura)
+
+#Funcao utilizada para a verificacao da assinatura digital a partir do fornecimento de 'f1' (que e o nome do arquivo original), de 'f2' (que e o nome do arquivo que contem a assinatura) pelo usuario, de um primo 'prime', de um gerador 'generator', e de uma chave publica de assinatura 'public'. 
 def VADigital(f1, f2, prime, generator, public):
 	fileAD = open(f2, 'r')
 	p = int(ConvertToDec(prime))
@@ -698,15 +800,15 @@ def VADigital(f1, f2, prime, generator, public):
 		charRead = 0
 		allFText = ''
 		print("Lendo arquivo...")
-		while(charRead < len(content)):
+		lC = len(content)
+		ConvertToBin = lambda x: format(x, 'b')
+		while(charRead < lC):
 			block = (ord(content[charRead]))
-			ConvertToBin = lambda x: format(x, 'b')
 			block = ConvertToBin(block)
 			allFText = str(allFText) + str(block)
 			charRead += 1
 		print("Arquivo lido!")
 		print("")
-		ConvertToBin = lambda x: format(x, 'b')
 		h = sha224(allFText).hexdigest()
 		h = int(ConvertToDec(h))
 		h = int(ConvertToBin(h))
@@ -716,6 +818,8 @@ def VADigital(f1, f2, prime, generator, public):
 			print("Assinatura Valida")
 		else:
 			print("Assinatura Invalida")
+
+#Programa principal de verificacao de assinatura digital que e apresentado ao usuario para que o mesmo forneca o nome do arquivo que se deseja verificar assinatura e o arquivo que contem a assinatura.
 def VADprogram():
 	file1 = ''
 	file2 = ''
@@ -779,9 +883,11 @@ def VADprogram():
 			print("Entrada invalida, tente novamente.")
 			print("")
 	VADigital(file1, file2, p, g, v)
+
 #-----------------------------------------------------------------------------------------------------------------------------
-#6
-#Metodos para o modo de assinatura digital e encriptacao
+#6 - Metodos para o modo de assinatura digital e encriptacao
+
+#Funcao utilizada para encriptar o arquivo escolhido pelo usuario junto com os componentes de assinatura 's' e 'f' a partir do metodo de RSA.
 def AEERSA(s,f):
 	oFile = f
 	signature = s
@@ -828,14 +934,30 @@ def AEERSA(s,f):
 	nameF = raw_input()
 	newF = open(nameF, 'w')
 	block = ''
+	cE = int(ConvertToDec(e))
+	cN = int(ConvertToDec(n))
+	lC = len(content)
+	blockM = ''
+	i = 0
 	print("")
 	print("Encriptando...")
-	while(c < len(content)):
+	while(c < lC): 
 		block = (ord(content[c])+100)
-		block = ExpModular(block, int(ConvertToDec(e)), int(ConvertToDec(n)))
-		newF.write(str(block)+"\n")
+		blockM = blockM + str(block)
+		i += 1 
+		if(i > 24):
+			i = 0
+			blockM = ExpModular(int(blockM), cE, cN)
+			newF.write(str(blockM)+"\n")
+			blockM = ''
+		elif(c == lC-1 and blockM != ''):
+			blockM = ExpModular(int(blockM), cE, cN)
+			newF.write(str(blockM)+"\n")
+			blockM = '' 
 		c += 1
-	print("Arquivo encriptado com sucesso!")
+	print("Arquivo encriptado e assinado com sucesso!")
+
+#Funcao utilizada para encriptar o arquivo escolhido pelo usuario junto com os componentes de assinatura 's' e 'f' a partir do metodo de El Gamal.
 def AEEElGamal(s, f):
 	oFile = f
 	signature = s
@@ -886,29 +1008,46 @@ def AEEElGamal(s, f):
 	nameF = raw_input()
 	newF = open(nameF, 'w')
 	block = ''
+	blockM = ''
+	i = 0
 	print("")
 	print("Encriptando...")
 	p = int(ConvertToDec(p))
 	g = int(ConvertToDec(g))
 	c = int(ConvertToDec(c))
-	while(l < len(content)):
+	lC = len(content)
+	while(l < lC):
 		block = (ord(content[l])+100)
-		k = random.randint(2,p-2)
-		s = ExpModular(g, k, p)
-		t = (block*ExpModular(c, k, p))%p
-		newF.write(str(s)+"\n")
-		newF.write(str(t)+"\n")
+		blockM = blockM + str(block)
+		i += 1 
+		if(i > 24):
+			i = 0
+			k = random.randint(2,p-2)
+			s = ExpModular(g, k, p)
+			t = (int(blockM)*ExpModular(c, k, p))%p
+			newF.write(str(s)+"\n")
+			newF.write(str(t)+"\n")
+			blockM = ''
+		elif(l == lC-1 and blockM != ''):
+			k = random.randint(2,p-2)
+			s = ExpModular(g, k, p)
+			t = (int(blockM)*ExpModular(c, k, p))%p
+			newF.write(str(s)+"\n")
+			newF.write(str(t)+"\n")
+			blockM = '' 
 		l += 1
-	print("Arquivo encriptado com sucesso!")
+	print("Arquivo encriptado e assinado com sucesso!")
+
+#Funcao utilizada para assinar digitalmente um arquivo de nome 'fileN' fornecido pelo usuario a partir de um primo 'prime' de um gerador 'generator' e uma chave privada 'privateK' tambem fornecidos pelo usuario.
 def AEADigital(fileN, prime, generator, privateK):
 	fileAD = open(fileN, 'r')
 	content = fileAD.read()
 	charRead = 0
 	allFText = ''
 	print("Lendo arquivo...")
+	ConvertToBin = lambda x: format(x, 'b')
 	while(charRead < len(content)):
 		block = (ord(content[charRead]))
-		ConvertToBin = lambda x: format(x, 'b')
 		block = ConvertToBin(block)
 		allFText = str(allFText) + str(block)
 		charRead += 1
@@ -922,7 +1061,6 @@ def AEADigital(fileN, prime, generator, privateK):
 		k = random.randint(2,p-2)
 	r = ExpModular(g, k, p)
 	kL = EuclidianoEstendido(k, p-1)
-	ConvertToBin = lambda x: format(x, 'b')
 	h = sha224(allFText).hexdigest()
 	h = int(ConvertToDec(h))
 	h = int(ConvertToBin(h))
@@ -939,6 +1077,8 @@ def AEADigital(fileN, prime, generator, privateK):
 	print("Arquivo assinado com sucesso!")
 	print("")
 	return signature
+
+#Programa principal de assinatura e encriptacao onde o usuario escolhera o arquivo que deseja assinar e o tipo de metodo de encriptacao que se deseja utilizar entre El Gamal e RSA.
 def AEprogram():
 	signature = ''
 	oFile = ''
@@ -1008,9 +1148,11 @@ def AEprogram():
 		else:
 			print("Entrada invalida, tente novamente.")
 			print("")
+
 #-----------------------------------------------------------------------------------------------------------------------------
-#7
-#Metodos para o modo de verificacao de assinatura digital e decriptacao
+#7 - Metodos para o modo de verificacao de assinatura digital e decriptacao
+
+#Funcao utilizada para decriptar e separar o arquivo de nome 'fName' escolhido pelo usuario da assinatura (criando um novo arquivo para salvar a assinatura) a partir do metodo de RSA.
 def VDRSA(fName):
 	chose = ''
 	n = 0
@@ -1052,12 +1194,23 @@ def VDRSA(fName):
 	line = primaryF.readline()
 	print("")
 	print("Decriptografando...")
+	cD = int(ConvertToDec(d))
+	cN = int(ConvertToDec(n))
 	temp = ''
+	nMessage = ''
 	while(line != ''):
 		block = line
-		block = ExpModular(int(block), int(ConvertToDec(d)), int(ConvertToDec(n)))
-		block = chr((int(block)-100))
-		temp = temp + block
+		block = ExpModular(int(block), cD, cN)
+		block = str(block)
+		i = 0
+		bL = len(block)
+		while(i < bL):
+			nMessage = block[i]
+			nMessage = nMessage + block[i+1]
+			nMessage = nMessage + block[i+2]
+			nMessage = chr((int(nMessage)-100))
+			temp = temp + nMessage
+			i += 3
 		line = primaryF.readline()
 	print("Arquivo decriptografado com sucesso!")
 	z = len(temp)
@@ -1073,6 +1226,8 @@ def VDRSA(fName):
 	temp = temp[:-128]
 	print("")
 	return r, s, temp, nameF
+
+#Funcao utilizada para decriptar e separar o arquivo de nome 'fName' escolhido pelo usuario da assinatura (criando um novo arquivo para salvar a assinatura) a partir do metodo de El Gamal.
 def VDElGamal(fName):
 	chose = ''
 	p = 0
@@ -1121,13 +1276,22 @@ def VDElGamal(fName):
 	temp = ''
 	blockS = primaryF.readline()
 	blockT = primaryF.readline()
+	nMessage = ''
 	print("")
 	print("Decriptografando...")
 	while(blockS != ''):
 		tempS = ExpModular(int(blockS), (p-1-a), p)
 		block = ((tempS*int(blockT))%p)
-		block = chr((int(block)-100))
-		temp = temp + block
+		i = 0
+		block = str(block)
+		bL = len(block)
+		while(i < bL):
+			nMessage = block[i]
+			nMessage = nMessage + block[i+1]
+			nMessage = nMessage + block[i+2]
+			nMessage = chr((int(nMessage)-100))
+			temp = temp + nMessage
+			i += 3
 		blockS = primaryF.readline()
 		blockT = primaryF.readline()
 	print("Arquivo decriptografado com sucesso!")
@@ -1145,6 +1309,8 @@ def VDElGamal(fName):
 	temp = temp[:-128]
 	print("")
 	return r,s,temp,nameF
+
+#Funcao utilizada para verificacao da assinatura do arquivo decriptado a partir do fornecimento de um conteudo do arquivo decriptado 'ct', do componente 'rl' de assinatura, do componente 'sl' de assinatura, de um primo 'prime', de um gerador 'generator' e de uma chave publica de assinatura 'public'.
 def VADE(ct,rl,sl, prime, generator, public):
 	s = sl
 	r = rl
@@ -1160,15 +1326,14 @@ def VADE(ct,rl,sl, prime, generator, public):
 		charRead = 0
 		allFText = ''
 		print("Lendo arquivo...")
+		ConvertToBin = lambda x: format(x, 'b')
 		while(charRead < len(content)):
 			block = (ord(content[charRead]))
-			ConvertToBin = lambda x: format(x, 'b')
 			block = ConvertToBin(block)
 			allFText = str(allFText) + str(block)
 			charRead += 1
 		print("Arquivo lido!")
 		print("")
-		ConvertToBin = lambda x: format(x, 'b')
 		h = sha224(allFText).hexdigest()
 		h = int(ConvertToDec(h))
 		h = int(ConvertToBin(h))
@@ -1178,6 +1343,8 @@ def VADE(ct,rl,sl, prime, generator, public):
 			print("Assinatura Valida")
 		else:
 			print("Assinatura Invalida")
+
+#Programa principal de verificacao de assinatura e decriptacao onde o usuario escolhera o arquivo que deseja decriptar e posteriormente como deseja salvar a assinatura obtida desse arquivo.
 def VDprogram():
 	oFile = ''
 	oFileV = False
@@ -1248,13 +1415,17 @@ def VDprogram():
 			print("")
 	print("Qual o nome do arquivo onde deseja salvar sua assinatura?")
 	aName = raw_input("")
+	print("")
 	fAD = open(aName, 'w')
 	fAD.write(r +"\n")
 	fAD.write(s +"\n")
 	VADE(contF, r, s, p, g, v)
-	
+	print("")
+	print("Arquivo decriptado e verificado com sucesso!")
+
 #-----------------------------------------------------------------------------------------------------------------------------
-#PROGRAMA PRINCIPAL
+
+#PROGRAMA PRINCIPAL - Esta e a funcao principal que se apresenta como um menu para o usuario, onde o mesmo podera escolher entre 1 e 7 para executar um dos modos do programa listados acima como principais de seus modos.
 def program():
 	chose = ""
 	print("Bem vindo ao trabalho de final do primeiro semestre de 2017 da disciplina de Numeros Inteiros e Criptografia da Universidade Federal do Rio de Janeiro.")

@@ -117,8 +117,6 @@ void UpdateBall(BALL *b, PADDLE *p)
 			{
 				scenes = 6;
 			}
-			/*b->vY *= -1;
-			b->transform.y += b->vY;*/
 		}
 		if(b->transform.x + b->transform.w >= p->transform.x && b->transform.x < p->transform.x + p->transform.w/2 &&
 			b->transform.y + b->transform.h >= p->transform.y && b->transform.y <= p->transform.y + p->transform.h &&
@@ -153,9 +151,13 @@ void UpdateBall(BALL *b, PADDLE *p)
 	}
 	else
 	{
-		b->transform.w = 30;
-		b->transform.h = 30;
+		b->transform.w = 15;
+		b->transform.h = 15;
 		b->transform.y = p->transform.y - p->transform.h;
+		if(b->vY > 0)
+		{
+			b->vY *= -1;
+		}
 		b->transform.x = p->transform.x + p->transform.w/2 - b->transform.w/2;
 	}
 }
@@ -240,15 +242,18 @@ void GameEvents(SDL_Event e)
 		        				start = false;
 		        				creation = true;
 		        				updateL = true;
+		        				showRec = false;
 		        			break;
 		        			case 1:
-		        				scenes = 2;
+		        				showRec = true;
 		        			break;
 		        			case 2:
 		        				scenes = 3;
+		        				showRec = false;
 		        			break;
 		        			case 3:
 		        				scenes = 4;
+		        				showRec = false;
 		        			break;
 		        			case 4:
 		        				running = false;
