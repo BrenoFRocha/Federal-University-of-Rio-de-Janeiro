@@ -172,6 +172,8 @@ def SaveKeysRSA(n,e,d):
 			privateF.write(d + "\n")
 			print("")
 			print("Chaves salvas com sucesso!")
+			publicF.close()
+			privateF.close()
 		elif(chose == "Exibir"):
 			print("Voce escolheu 'Exibir' as chaves e componentes gerados.")
 			print("")
@@ -211,6 +213,8 @@ def SaveKeysElGamal(p,g,c,a):
 			privateF.write(a + "\n")
 			print("")
 			print("Chaves salvas com sucesso!")
+			privateF.close()
+			publicF.close()
 		elif(chose == "Exibir"):
 			print("Voce escolheu 'Exibir' as chaves e componentes gerados.")
 			print("")
@@ -396,7 +400,9 @@ def ERSA(fName):
 			blockM = '' 
 		c += 1
 	print("Arquivo encriptado com sucesso!")
-
+	publicF.close()
+	primaryF.close()
+	newF.close()
 #Funcao de encriptacao de um arquivo de nome 'fName' e salvamento de um novo arquivo utilizando El Gamal.
 def EElGamal(fName):
 	chose = ''
@@ -474,7 +480,9 @@ def EElGamal(fName):
 			blockM = '' 
 		l += 1
 	print("Arquivo encriptado com sucesso!")
-
+	publicF.close()
+	primaryF.close()
+	newF.close()
 #Programa principal de encriptacao que e apresentado ao usuario para que o mesmo forneca o arquivo que se deseja encriptar utilizando RSA ou El Gamal.
 def Eprogram():
 	chose = ''
@@ -572,6 +580,9 @@ def DRSA(fName):
 			i += 3
 		line = primaryF.readline()
 	print("Arquivo decriptografado com sucesso!")
+	privateF.close()
+	primaryF.close()
+	newF.close()
 
 #Funcao de decriptacao de um arquivo de nome 'fName' e salvamento de um novo arquivo utilizando o metodo do El Gamal.
 def DElGamal(fName):
@@ -642,6 +653,9 @@ def DElGamal(fName):
 		blockS = primaryF.readline()
 		blockT = primaryF.readline()
 	print("Arquivo decriptografado com sucesso!")
+	privateF.close()
+	primaryF.close()
+	newF.close()
 
 #Programa principal de decriptacao que e apresentado ao usuario para que o mesmo forneca o nome do arquivo que se deseja decriptar utilizando RSA ou El Gamal.
 def Dprogram():
@@ -720,7 +734,8 @@ def ADigital(primaryF, prime, generator, privateK):
 	fileF.write(r +"\n")
 	fileF.write(s +"\n")
 	print("Arquivo assinado com sucesso!")
-
+	fileF.close()
+	fileAD.close()
 #Programa principal de assinatura digital que e apresentado ao usuario para que o mesmo forneca o nome do arquivo que se deseja assinar.
 def ADprogram():
 	p = 10
