@@ -22,7 +22,6 @@ def expmodular(n,b, m):
 		else:
 			print(str(column1) + " " + str(column2) + " " + str(column3) + " " + "S")
 	return column1
-
 def program():
 	repeat = (int)(raw_input(""))
 	counter = 0
