@@ -40,6 +40,23 @@ def expmodular(n,b, m):
 			print(str(column1) + " " + str(column2) + " " + str(column3) + " " + "S")
 		if(column3 == 0):
 			return column1
+def expmodnoprint(n,b,m):
+	number3 = m
+	column1 = 1
+	column2 = b
+	column3 = n
+	while(column3 != 0):
+		if(column3 % 2 == 0):
+			column3 /= 2
+			column2 *= column2
+			column2 = column2%number3
+		else:
+			column3 = (column3-1)/2
+			column1= (column1*column2)%number3
+			column2 *= column2
+			column2 = column2%number3
+		if(column3 == 0):
+			return column1
 def program():
 	repeat = raw_input("")
 	counter = 0;
@@ -51,7 +68,7 @@ def program():
 		b = 2
 		result = []
 		print(b)
-		if(expmodular(number-1,b,number) != 1):
+		if(expmodnoprint(number-1,b,number) != 1):
 			print("COMPOSTO")
 		else:
 			while(countT < len(listNI)):
