@@ -1,3 +1,4 @@
+//Developed by: Breno Rocha - github.com/BrenoFerreiraRocha
 public class Main
 {
 	public static void main(String[] args) throws VectorSizeException

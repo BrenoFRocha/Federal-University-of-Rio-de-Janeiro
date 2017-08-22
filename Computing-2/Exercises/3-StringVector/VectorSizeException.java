@@ -1,3 +1,4 @@
+//Federal University of Rio de Janeiro
 @SuppressWarnings( "serial" )
 
 public class VectorSizeException extends Exception 

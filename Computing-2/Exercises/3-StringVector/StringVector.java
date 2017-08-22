@@ -1,3 +1,4 @@
+//Developed by: Breno Rocha - github.com/BrenoFerreiraRocha
 public class StringVector
 {
 	private int lastSize, vectorSize;
