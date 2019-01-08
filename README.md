@@ -18,6 +18,6 @@ In this repository, you can find some of the projects and exercises made by me i
 
 ### Important
 
-- Author: [Breno Rocha](https://github.com/BrenoFerreiraRocha).
+- Author: [Breno Rocha](https://github.com/BrenoFRocha).
 
 Suggestions or Contact: Having problems with this repository? Having suggestions for me about a project? Contact me at brenoferreirarocha@gmail.com and I will be happy to help and listen you.
