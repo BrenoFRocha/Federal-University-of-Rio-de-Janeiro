@@ -1,6 +1,6 @@
 # Federal University of Rio de Janeiro - UFRJ
 
-In this repository, you can find some of the projects and exercises made by me in the subjects of the course of Computer Science of Federal University of Rio de Janeiro.
+In this repository, you can find some of the projects and exercises made by me in the subjects of the course of Computer Science of Federal University of Rio de Janeiro. These are educational projects.
 
 ## Projects by Subject
 
